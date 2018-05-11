@@ -3,7 +3,7 @@ from microbit import *
 offset = 580
 
 def read():
-    return pin2.read_analog() - offset
+    return max(0, pin2.read_analog() - offset)
 
 def wait_for_double_clap(timeout=1000, spread=500, sensitivity=75):
     sensitivity = 105 - sensitivity
