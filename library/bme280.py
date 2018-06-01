@@ -29,7 +29,7 @@ def i2c_write(address, reg, values):
     values.insert(0, reg)
     microbit.i2c.write(address, bytes(values))
 
-class bmp280():
+class bme280():
     def __init__(self, i2c_bus=None, addr=ADDR):
         self._temperature = 0
         self._pressure = 0
@@ -127,8 +127,10 @@ class bmp280():
         self._humidity = h
         self._altitude = 44330.0 * (1.0 - pow(self._pressure / self._qnh, (1.0/5.255)))
 
+bmp280 = bme280
+        
 if __name__ == "__main__":
-    b = bmp280()
+    b = bme280()
     while True:
         t, p, h, a = b.all()
         print("T: {t}, P: {p}, H: {h}, A: {a}".format(t=t,p=p,h=h,a=a))
