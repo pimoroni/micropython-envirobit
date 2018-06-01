@@ -24,3 +24,21 @@ Now open the "Files" dialog (you might have to close the "Repl" first) and drag 
 When you reset your micro:bit, it will load main.py- so you can "import" the libraries and start writing your code here!
 
 # Function Reference
+
+## bme280
+
+For temperature, pressure and humidity readings you must use the bme280 driver. First initialise it like so:
+
+```
+import bme280
+bme = bme280.bme280
+```
+
+Your class instance, `bme`, will now have the following methods:
+
+* `bme.temperature()` - return the temperature in degrees C
+* `bme.pressure()` - return the pressure in hectopascals
+* `bme.humidity()` - return the relative humidity in %
+* `bme.altitude()` - return the altitude in feet, calculated against the current QNH value
+* `bme.set_qnh(value)` - set the QNH value for calculating altitude
+
