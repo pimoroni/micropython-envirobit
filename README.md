@@ -42,3 +42,17 @@ Your class instance, `bme`, will now have the following methods:
 * `bme.altitude()` - return the altitude in feet, calculated against the current QNH value
 * `bme.set_qnh(value)` - set the QNH value for calculating altitude
 
+## sound
+
+For sound readings you must use the sound driver. First initialise it like so:
+
+```
+import sound
+sound = sound.sound()
+```
+
+Your class instance, `sound`, will now have the following methods:
+
+* `sound.read()` - take a reading of the sound level which you can use to compare different sound levels 
+* `sound.wait_for_double_clap()` - listen for a high sound level twice in a second
+* `sound.wait_for_clap()` - listen for a high sound level once in a second 
