@@ -1,22 +1,26 @@
-#this example takes a reading of the amount of red visible to the colour sensor
+# this example takes a reading of the amount of red, green and blue visible to the colour sensor
+# displays the result as three numbers on the microbit screen, eg (120, 88, 30)
+# remember to copy the tcs3472 library onto the microbit before flashing this code
 
-import envirolight
+import tcs3472
 import microbit
+
+tcs3472 = tcs3472.tcs3472()
 
 #flash lights twice, read on third flash
 while True:
-    envirolight.colour.set_leds(1)
+    tcs3472.set_leds(1)
     microbit.sleep(300)
-    envirolight.colour.set_leds(0)
+    tcs3472.set_leds(0)
     microbit.sleep(300)
-    envirolight.colour.set_leds(1)
+    tcs3472.set_leds(1)
     microbit.sleep(300)
-    envirolight.colour.set_leds(0)
+    tcs3472.set_leds(0)
     microbit.sleep(300)
-    envirolight.colour.set_leds(1)
+    tcs3472.set_leds(1)
     microbit.sleep(300)
-    reading = envirolight.colour.rgb()
+    reading = tcs3472.rgb()
     microbit.display.scroll(str(reading))
-    envirolight.colour.set_leds(0)
+    tcs3472.set_leds(0)
     microbit.sleep(3000)
     
