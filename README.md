@@ -54,8 +54,8 @@ sound = sound.sound()
 Your class instance, `sound`, will now have the following methods:
 
 * `sound.read()` - take a reading of the sound level which you can use to compare different sound levels 
-* `sound.wait_for_double_clap()` - listen for a high sound level twice in a second
-* `sound.wait_for_clap()` - listen for a high sound level once in a second
+* `sound.wait_for_double_clap()` - listen for a high sound level twice in a second, returns True if detected 
+* `sound.wait_for_clap()` - listen for a high sound level once in a second, returns True if detected 
 
 ## tcs3472
 
@@ -69,8 +69,8 @@ light_sensor = tcs3472.tcs3472()
 
 Your class instance, `light_sensor`, will now have the following methods:
 
-* `light_sensor.rgb()` - returns the corrected levels of red,green and blue out of 255  
-* `light_sensor.scaled()` - return the amounts of red,green and blue on a scale of 0-1 
+* `light_sensor.rgb()` - returns the corrected levels of red, green and blue out of 255  
+* `light_sensor.scaled()` - return the amounts of red, green and blue on a scale of 0-1 
 * `light_sensor.light()` - return a raw reading of light level on a scale of 0-65535 
 * `light_sensor.set_leds()` - turn the leds on and off with 0 or 1
 
