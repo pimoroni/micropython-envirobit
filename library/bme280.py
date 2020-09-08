@@ -12,10 +12,14 @@ CONFIG = 0b10010000
 # x16 oversampling, normal mode
 CTRL_MEAS = 0b10110111
 
+# x16 humidity oversampling
+CTRL_HUM = 0b00000101
+
 R_CHIPID = 0xD0
 R_VERSION = 0xD1
 R_SOFTRESET = 0xE0
 R_CONTROL = 0xF4
+R_HCONTROL = 0xF2
 R_CONFIG  = 0xF5
 R_STATUS = 0xF3
 
@@ -23,11 +27,8 @@ def i2c_read(address, reg, length=1):
     microbit.i2c.write(address, bytes([reg]), repeat=True)
     return microbit.i2c.read(address, length)
     
-def i2c_write(address, reg, values):
-    if type(values) is not list:
-        values = [values]
-    values.insert(0, reg)
-    microbit.i2c.write(address, bytes(values))
+def i2c_write(address, reg, value):
+    microbit.i2c.write(address, bytes([reg, value]))
 
 class bme280():
     def __init__(self, i2c_bus=None, addr=ADDR):
@@ -39,6 +40,8 @@ class bme280():
         self.addr = addr
 
         i2c_write(self.addr, R_SOFTRESET, 0xB6)
+        microbit.sleep(200)
+        i2c_write(self.addr, R_HCONTROL, CTRL_HUM)
         microbit.sleep(200)
         i2c_write(self.addr, R_CONTROL, CTRL_MEAS)
         microbit.sleep(200)
@@ -84,16 +87,21 @@ class bme280():
             _, \
             dig_H1, dig_H2, dig_H3, \
             reg_E4, reg_E5, reg_E6, \
-           dig_H6 = struct.unpack("<HhhHhhhhhhhhbBhBbBbb", self.compensation)
+            dig_H6 = struct.unpack("<HhhHhhhhhhhhbBhBbBbb", self.compensation)
 
         dig_H4 = (reg_E5 & 0x0f) | (reg_E4 << 4)
         dig_H5 = (reg_E5 >> 4) | (reg_E6 << 4)
+
+        if dig_H4 & (1 << 12):
+            dig_H4 -= 1 << 12
+        if dig_H5 & (1 << 11):
+            dig_H5 -= 1 << 12
             
         raw = i2c_read(self.addr, 0xF7, 8)
 
-        raw_temp=(raw[3]<<12)+(raw[4]<<4)+(raw[5]>>4)
-        raw_press=(raw[0]<<12)+(raw[1]<<4)+(raw[2]>>4)
-        raw_hum=(raw[6]<<8)+raw[7]
+        raw_temp=(raw[3]<<12)|(raw[4]<<4)|(raw[5]>>4)
+        raw_press=(raw[0]<<12)|(raw[1]<<4)|(raw[2]>>4)
+        raw_hum=(raw[6]<<8)|raw[7]
 
         var1=(raw_temp/16384.0-dig_T1/1024.0)*dig_T2
         var2=(raw_temp/131072.0-dig_T1/8192.0)*(raw_temp/131072.0-dig_T1/8192.0)*dig_T3
@@ -112,15 +120,16 @@ class bme280():
         var2=press*dig_P8/32768.0
         press=press+(var1+var2+dig_P7)/16.0
 
-        h = float(t_fine) - 76800.0
-        h = (raw_hum - (float(dig_H4) * 64.0 + float(dig_H5) / 16384.0 * h)) * (
-        float(dig_H2) / 65536.0 * (1.0 + float(dig_H6) / 67108864.0 * h * (
-        1.0 + float(dig_H3) / 67108864.0 * h)))
-        h = h * (1.0 - float(dig_H1) * h / 524288.0)
-        if h > 100:
-            h = 100
-        elif h < 0:
-            h = 0
+        var1 = t_fine - 76800.0
+        var2 = dig_H4 * 64.0 + (dig_H5 / 16384.0) * var1
+        var3 = raw_hum - var2
+        var4 = dig_H2 / 65536.0
+        var5 = 1.0 + (dig_H3 / 67108864.0) * var1
+        var6 = 1.0 + (dig_H6 / 67108864.0) * var1 * var5
+        var6 = var3 * var4 * (var5 * var6)
+
+        h = var6 * (1.0 - dig_H1 * var6 / 524288.0)
+        h = max(0, min(100, h))
 
         self._temperature = temp
         self._pressure = press / 100.0
