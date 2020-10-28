@@ -3,6 +3,8 @@ import struct
 
 ADDR = 0x29
 
+LEVEL = 65.535
+
 class tcs3472:
     def __init__(self):
         i2c.write(ADDR, b'\x80\x03')
@@ -20,6 +22,9 @@ class tcs3472:
 
     def light(self):
         return self.raw()[0]
+    
+    def brightness(self, level=LEVEL):
+        return int((self.light() / level))
 
     def valid(self):
         i2c.write(ADDR, b'\x93')
